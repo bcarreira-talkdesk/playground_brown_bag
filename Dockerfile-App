@@ -1,0 +1,28 @@
+FROM adoptopenjdk/openjdk11:debian-slim as BUILD_IMAGE
+
+ENV DOCKERIZE_VERSION v0.6.1
+ENV APP_HOME /app
+
+WORKDIR $APP_HOME
+
+# Download dependencies
+ADD build.gradle.kts $APP_HOME
+ADD settings.gradle.kts $APP_HOME
+ADD gradlew $APP_HOME
+ADD gradle $APP_HOME/gradle
+
+RUN apt-get update && apt-get install -y wget && \
+        wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+        && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+        && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+
+COPY src $APP_HOME/src
+RUN $APP_HOME/gradlew clean build -x test
+
+#
+# APP to run
+FROM adoptopenjdk/openjdk11:debian-slim as APP
+WORKDIR /app
+COPY --from=BUILD_IMAGE /usr/local/bin/dockerize /usr/local/bin/dockerize
+COPY --from=BUILD_IMAGE /app/build/libs/playground-0.0.1-SNAPSHOT.jar playground.jar

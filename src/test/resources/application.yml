@@ -1,0 +1,7 @@
+logging.level.com.talkdesk: 'trace'
+http.retry.interval: 2000
+http.retry.max.attempts: 3
+
+spring.profiles.active: dev
+spring.application.name: playground
+spring.redis.cluster.nodes: 127.0.0.1:6381,127.0.0.1:6382,127.0.0.1:6383

@@ -1,0 +1,103 @@
+version: '3.5'
+#  redis-cli --cluster create 172.28.0.2:6379 172.28.0.3:6379 172.28.0.4:6379 172.28.0.5:6379 172.28.0.6:6379 172.28.0.7:6379 --cluster-replicas 1
+
+services:
+
+  redis-node1:
+    image: "redis:5.0.7-alpine"
+    entrypoint: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6381:6379
+    volumes:
+      - ./docker_configs/redis-cluster/redis.conf:/usr/local/etc/redis/redis.conf
+
+  redis-node2:
+    image: "redis:5.0.7-alpine"
+    entrypoint: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6382:6379
+    volumes:
+      - ./docker_configs/redis-cluster/redis.conf:/usr/local/etc/redis/redis.conf
+
+  redis-node3:
+    image: "redis:5.0.7-alpine"
+    entrypoint: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6383:6379
+    volumes:
+      - ./docker_configs/redis-cluster/redis.conf:/usr/local/etc/redis/redis.conf
+
+  redis-node4:
+    image: "redis:5.0.7-alpine"
+    entrypoint: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6384:6379
+    volumes:
+      - ./docker_configs/redis-cluster/redis.conf:/usr/local/etc/redis/redis.conf
+
+  redis-node5:
+    image: "redis:5.0.7-alpine"
+    entrypoint: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6385:6379
+    volumes:
+      - ./docker_configs/redis-cluster/redis.conf:/usr/local/etc/redis/redis.conf
+
+  redis-node6:
+    image: "redis:5.0.7-alpine"
+    entrypoint: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6386:6379
+    volumes:
+      - ./docker_configs/redis-cluster/redis.conf:/usr/local/etc/redis/redis.conf
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-App
+      target: APP
+    ports:
+      - 8080:8080
+      - 8081:8081
+    environment:
+      - SPRING_REDIS_CLUSTER_NODES=redis-node1:6379,redis-node2:6379,redis-node3:6379
+    command: dockerize
+      -wait tcp://redis-node1:6379
+      -wait tcp://redis-node2:6379
+      -wait tcp://redis-node3:6379
+      -wait tcp://redis-node4:6379
+      -wait tcp://redis-node5:6379
+      -wait tcp://redis-node6:6379
+      -timeout 5m -wait-retry-interval 2s
+      sh -c 'java -jar playground.jar -XX:+UseG1GC -XX:+CrashOnOutOfMemoryError -Xmx512m -Xms512m'
+    depends_on:
+      - redis-node1
+      - redis-node2
+      - redis-node3
+      - redis-node4
+      - redis-node5
+      - redis-node6
+
+
+  redis-cluster-creator:
+    build:
+      context: .
+      dockerfile: Dockerfile-ClusterBuilder
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: dockerize
+      -wait tcp://redis-node1:6379
+      -wait tcp://redis-node2:6379
+      -wait tcp://redis-node3:6379
+      -wait tcp://redis-node4:6379
+      -wait tcp://redis-node5:6379
+      -wait tcp://redis-node6:6379
+      -timeout 5m -wait-retry-interval 2s
+      sh -c '/entrypoint.sh 6 1'
+    depends_on:
+      - redis-node1
+      - redis-node2
+      - redis-node3
+      - redis-node4
+      - redis-node5
+      - redis-node6
