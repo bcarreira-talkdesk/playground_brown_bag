@@ -1,0 +1,15 @@
+version: '3.5'
+#  redis-cli --cluster create 172.28.0.2:6379 172.28.0.3:6379 172.28.0.4:6379 172.28.0.5:6379 172.28.0.6:6379 172.28.0.7:6379 --cluster-replicas 1
+
+services:
+
+  redis:
+    image: "redis:5.0.7-alpine"
+    entrypoint: /redis-start.sh
+    ports:
+      - 16379:16379
+      - 16380:16380
+      - 16381:16381
+    volumes:
+      - ./docker_configs/redis-start.sh:/redis-start.sh
+      - ./docker_configs/redis-cluster:/usr/local/etc/redis

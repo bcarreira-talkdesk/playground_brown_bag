@@ -24,7 +24,7 @@ class RedisConfiguration() {
     @Bean
     @Primary
     fun redisClusterConnectionFactory(): LettuceConnectionFactory {
-        val redisStandaloneConfiguration = RedisClusterConfiguration("redis-node1:6379,redis-node2:6379,redis-node3:6379".split(","))
+        val redisStandaloneConfiguration = RedisClusterConfiguration("localhost:16379,localhost:16380,localhost:16381".split(","))
         return LettuceConnectionFactory(
                 redisStandaloneConfiguration
         )

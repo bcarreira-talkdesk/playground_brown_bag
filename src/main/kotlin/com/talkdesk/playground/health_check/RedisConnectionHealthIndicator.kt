@@ -5,11 +5,12 @@ import org.springframework.boot.actuate.health.Health
 import org.springframework.boot.actuate.health.HealthIndicator
 import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 
 @Component
 class RedisConnectionHealthIndicator(
-    private val redisConnectionFactory: LettuceConnectionFactory,
+    private val redisConnectionFactory: LettuceConnectionFactory
 ) : HealthIndicator {
     private var connection: RedisConnection? = null
     private val logger = LoggerFactory.getLogger(this::class.java)
